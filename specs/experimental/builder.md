@@ -39,8 +39,8 @@ Block Builder Network to serve payloads or how to manage Block Builder configs o
 sequenceDiagram
     participant CLS as Op-Node (Sequencer)
     participant ELS as Execution Client (Sequencer)
-    participant CLB as Op-Node (Builder)
     participant ELB as Execution Client (Builder)
+    participant CLB as Op-Node (Builder)
 
     %% Pick subscription endpoint %%
     ELB-->>ELS: Subscribe to `PayloadAttribute` events
