@@ -52,7 +52,7 @@ sequenceDiagram
     CLS->>ELS: engine_newPayoad()
     ELS->>ELS: Start building block for `payloadId`
 
-    Note over CLB: New block is peered via Beacon API
+    Note over CLB: New block is peered from CL
     CLB->>ELB: engine_forkchoiceUpdated(forkchoiceState, null)
     CLB->>ELB: engine_newPayload()
 
