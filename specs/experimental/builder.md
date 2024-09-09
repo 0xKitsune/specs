@@ -27,7 +27,7 @@ needed to allow a local Block Builder.
 
 By decoupling the block construction process from the Sequencer's Execution Engine, operators can tailor transaction
 sequencing rules without diverging from the standard Optimism Protocol Client. This flexibility allows individual chains
-to experiment on seqeuncing features, providing a means for differentiation. This minimum viable design also includes
+to experiment on sequencing features, providing a means for differentiation. This minimum viable design also includes
 a local block production fallback as a training wheel to ensure liveness and network performance in the event of
 local Block Builder failure.
 
@@ -35,25 +35,43 @@ It is important to note that this document ***does not*** outline how to safely 
 Block Builder Network to serve payloads or how to manage Block Builder configs on L1.
 
 ## Sequencer Builder Interaction
-
 ```mermaid
 sequenceDiagram
-    participant EES as Exec Engine (Sequencer)
-    participant OPS as Op-Node (Sequencer)
-    participant OPB as Op-Node (Block Builder)
-    participant BB as Block Builder
-    OPS-->> OPB: Fork Choice Update (p2p)
-    OPB-->>BB: Fork Choice Update
-    
-    EES-->>BB:   builder_forwardTransactionV1
-    Note right of Builder: timespan for building blocks
-    OPS->> BB: builder_getPayloadV1
-    BB-->>OPS: BuilderPayloadV1
-    OPS-->>OPS: SimulatePayload
-    OPS-->>OPS: ConfirmPaylaod
-    OPS ->> EES: engine_forkchoiceUpdatedV3
+    participant CLS as Op-Node (Sequencer)
+    participant ELS as Execution Client (Sequencer)
+    participant CLB as Op-Node (Builder)
+    participant ELB as Execution Client (Builder)
 
+    %% Pick subscription endpoint %%
+    ELB-->>ELS: Subscribe to `PayloadAttribute` events
+
+    %% Update to event emission %%
+    CLS-->>ELS: `engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)`
+    ELS-->>ELB: emit `PayloadAttribute` event
+    ELB-->>ELB: Prepare to build block for `payloadId`
+    CLS-->>ELS: `engine_newPayoad()`
+    ELS->>ELS: Start building block for `payloadId`
+
+    Note over CLB: New block is peered via Beacon API
+    CLB->>ELS: `engine_forkchoiceUpdated(forkchoiceState, null)
+    CLB->>ELS: `engine_newPayload()
+
+    %% TODO: repeat %% 
+    ELB->>ELB: Build block for `payloadId`
+    ELB-->>ELS: Send `BuilderPayload` for `payloadId`
+    ELS->>ELS: Simulate payload and update best block
+
+    CLS->>ELS: `engine_getPayload`
+    
+    Note over ELS: Best block is sent
+    ELS-->>CLS: ExecutionPayload
+
+    Note over CLS: Peer new block to network
 ```
+
+
+
+
 
 - **Fork Choice Update**: The Sequencer propagates a Fork Choice Update to the Block Builder, indicating an update
 to the chain's latest head.
