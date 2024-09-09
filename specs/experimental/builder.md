@@ -88,7 +88,7 @@ A builder network's throughput is conditional on the transactions it sees. Thus 
 
 ### Builder Configuration
 
-A builder is defined as the tuple (`builderPubkey`, `builderUrl`). The Sequencer is responsible for managing this tuple, but it will eventually live on the L1 [`SystemConfig`](https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/system_config.md)
+A builder is defined as the tuple (`builderPubkey`, `builderUrl`). The Sequencer is responsible for managing this tuple, but it will eventually live on the L1 [`SystemConfig`](https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/system-config.md)
 where changes are emitted as an event. ***Builder's have no restriction or policies enforced on them at this time.***
 
 ## Structures
