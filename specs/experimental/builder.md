@@ -104,68 +104,60 @@ This structure contains information necessary start constructing a new block for
 
 This structure represents the Block Builder's response to the request for payload.
 
-- `executionPayload`: [`ExecutionPayloadV2`]((https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2))
+- `executionPayload`: [`ExecutionPayloadV2`](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2)
 - `pubKey`: `Address`
 - `value`: `uint256` 
 
-<!-- 
+
 ## Methods
 
-### `builder_getPayloadV1`
+### `builder_newPayloadV1`
 
 **Request**
 
-- **method**: `builder_getPayloadV1`
+- **method**: `builder_newPayloadV1`
 - **params**:
-    1. `payload`: `PayloadRequestV1`
+    1. `BuilderPayloadV1`
         - **Required**: true
-        - **Description**: Details of block construction request for local Block Builder
-  - `signature` : `Signature`
-    - **Required**: true
-    - **Description**: `secp256k1` signature over `payload`
+        - **Description**: The payload constructed by the Builder's Execution Client. This includes:
+          - `executionPayload`: The set of transactions and other block-level data that constitutes the block being proposed.
+          - `pubKey`: The public key of the Builder responsible for constructing the payload.
+          - `value`: The associated block reward value, if applicable.
 - **timeout**: 200ms
+    - The request should time out after 200ms. If the Sequencer fails to receive the payload within this time frame, it will continue using the local block construction to ensure liveness.
 - **retries**: 0
-  - Timeout does not leave enough time to retry for this block, Sequencer ***SHOULD*** use local block and move on.
+    - No retries are performed for this method as the Sequencer must use the locally constructed block if the Builder fails to provide a valid payload within the given timeout.
 
 **Response**
 
-- **result**: `BuilderPayloadV1`
-- **error**: code and message set in case an exception happens while getting the payload.
+- **result**: `bool`
+    - **Description**: A boolean indicating whether the payload was successfully received and processed by the Sequencer's Execution Client (EL).
+        - `true`: The payload was successfully received and processed.
+        - `false`: The payload was rejected or encountered an error during validation.
+- **error**: Code and message in case an error occurs during payload submission.
 
 **Specification**
 
-1. Client software ***MAY*** call this method if `builderPubkey` and `builderUrl` are set.
-2. Client software ***MUST*** validate that the response object `BuilderPayloadV1` contains `executionPayload`
-and that `pubKey` matches the registered `builderPubkey`.
-3. Client software ***MUST*** follow the same specification
-as [`engine_newPayloadV3`](https://github.com/ethereum/execution-apis/blob/main/src/engine/cancun.md#executionpayloadv3)
-with the response body `executionPayload`.
-4. Client software ***MUST*** simulate transactions in `executionPayload` on `parentHash` in`payload` all fields
-in `executionPayload` are correct as compared to local view of chain.
-5. Client ***SHOULD*** use local block in the event of a timeout from calling `builder_getPayloadV1`.
+1. `builder_newPayloadV1` is an RPC method used by the Builder's Execution Client to submit a new execution payload to the Sequencer's Execution Client (EL). 
+2. The Sequencer's Execution Client **MUST** validate and simulate each execution payload received by a builder.
+3. The Sequencer **MUST** maintain liveness by continuously receiving and validating new payloads from the Builder until the `engine_newPayload` call is invoked by the Sequencer's Consensus Layer.
+4. The best block **MUST** be chosen from all submitted payloads for a given `payloadId`. If the timeout is reached without a valid payload, the Sequencer will fallback to the locally constructed block.
 
-### `builder_forwardTransactionV1`
 
-**Request**
+### BuilderAttributes Stream
 
-- **method**: `builder_forwardTransactionV1`
-- **params**:
-    1. `transaction`: `string`
-        - **Required**: true
-        - **Description**: Hex Encoded RLP string of the transaction
-- **timeout**: 200ms
-  - Short timeout to increase chance of including high priority gas transactions in the Builder's current block
-- **retries**: 5
-  - Needed to ensure user transactions do not get "lost" in event of a failed post. Client ***SHOULD*** log
-    loudly in event all 5 retries fail.
+**Specification**:
 
-**Response**
-
-- **result**: `status`
-- **error**: code and message set in case an exception happens while storing the transaction.
-
-**Specification**
-
-1. Client software ***MAY*** call this method if `builderPubkey` and `builderUrl` are set.
-2. Client software ***MUST*** retry if status is not `200`. 
- -->
+1. Upon initialization, the Sequencer's Execution Client (EL) **MUST** start streaming `BuilderAttributesV1` events.
+2. Each `BuilderAttributesV1` event contains:
+   - `forkChoiceUpdate`: The updated fork choice state from the Sequencer's Consensus Layer (CL), indicating the latest chain head and fork status.
+   - `payloadAttributes`: The attributes required to build a new block.
+   - `payloadId`: A unique identifier for the current pending block.
+3. The Builder **MUST** subscribe to this stream using the following RPC method:
+    #### `builder_subscribeBuilderAttributes`
+    - **method**: `builder_subscribeBuilderAttributes`
+    - **params**: None
+    - **Response**: Confirmation that the Builder has successfully subscribed to the `BuilderAttributes` stream.
+        - **result**: `bool`
+            - `true`: Successfully subscribed.
+            - `false`: Subscription failed.
