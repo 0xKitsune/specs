@@ -43,7 +43,7 @@ sequenceDiagram
 
     ELS->>ELS: Start `BuilderAttribute` stream
 
-    Note over ELB: Subscribe to new `BuilderAttributes`s from the sequencer
+    Note over ELB: Subscribe to new BuilderAttributes from the sequencer
     ELB-->>ELS: builder_subscribeBuilderAttributes
 
     CLS-->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
