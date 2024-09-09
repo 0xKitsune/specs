@@ -44,11 +44,11 @@ sequenceDiagram
     ELS->>ELS: Start `BuilderAttribute` stream
 
     Note over ELB: Subscribe to new BuilderAttributes from the sequencer
-    ELB-->>ELS: builder_subscribeBuilderAttributes
+    ELB->>ELS: builder_subscribeBuilderAttributes
 
     CLS-->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
     ELS-->>ELB: emit `BuilderAttribute` event
-    ELB-->>ELB: Prepare to build block for `payloadId`
+    ELB->>ELB: Prepare to build block for `payloadId`
     CLS->>ELS: engine_newPayoad()
     ELS->>ELS: Start building block for `payloadId`
 
@@ -62,7 +62,7 @@ sequenceDiagram
 
     CLS->>ELS: engine_getPayload()
     Note over ELS: Propose the best block from all proposed blocks
-    ELS-->>CLS: ExecutionPayload
+    ELS->>CLS: ExecutionPayload
 
     CLS->>CLS: Validate payload
     Note over CLS: Publish new block and peer to the network
