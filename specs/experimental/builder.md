@@ -56,12 +56,10 @@ sequenceDiagram
     CLB->>ELB: `engine_forkchoiceUpdated(forkchoiceState, null)
     CLB->>ELB: `engine_newPayload()
 
-    loop Build and Send Payload
-        ELB->>ELB: Build block for `payloadId`
-        ELB->>ELS: builder_newPayload(BuilderPayload)
-        ELS->>ELS: Simulate payload and update best block
-    end
-    
+    ELB->>ELB: Build block for `payloadId`
+    ELB->>ELS: builder_newPayload(BuilderPayload)
+    ELS->>ELS: Simulate payload and update best block
+
     CLS->>ELS: `engine_getPayload`
     
     Note over ELS: Best block is sent
