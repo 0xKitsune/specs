@@ -9,7 +9,7 @@
   - [Mempool Forwarding](#mempool-forwarding)
   - [Builder Configuration](#builder-configuration)
 - [Structures](#structures)
-  - [`BuilderAttributesV1`](#payloadrequestv1)
+  - [`BuilderAttributesV1`](#builderattributesv1)
   - [`BuilderPayloadV1`](#builderpayloadv1)
 <!-- - [Methods](#methods)
   - [`builder_getPayloadV1`](#builder_getpayloadv1)
