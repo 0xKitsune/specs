@@ -5,12 +5,11 @@
 
 - [Overview](#overview)
 - [Sequencer Builder Interaction](#sequencer-builder-interaction)
-  - [Requesting a Block](#requesting-a-block)
-    - [Liveness Failsafe](#liveness-failsafe)
+  - [Liveness Failsafe](#liveness-failsafe)
   - [Mempool Forwarding](#mempool-forwarding)
   - [Builder Configuration](#builder-configuration)
 - [Structures](#structures)
-  - [`PayloadRequestV1`](#payloadrequestv1)
+  - [`BuilderAttributesV1`](#payloadrequestv1)
   - [`BuilderPayloadV1`](#builderpayloadv1)
 - [Methods](#methods)
   - [`builder_getPayloadV1`](#builder_getpayloadv1)
@@ -58,7 +57,7 @@ sequenceDiagram
     CLB->>ELB: engine_newPayload()
 
     ELB->>ELB: Build block for `payloadId`
-    ELB->>ELS: builder_newPayload(BuilderPayload)
+    ELB->>ELS: builder_newPayload(BuilderPayloadV1)
     ELS->>ELS: Simulate payload and update best block
 
     CLS->>ELS: engine_getPayload()
@@ -72,41 +71,30 @@ sequenceDiagram
 
 - **BuilderAttribute Stream**: Upon initialization, the Sequencer EL starts a `BuilderAttribute` stream, enabling external block builders to consume the update and prepare to construct a new block for a given `payloadId`.
 
-- **Fork Choice Update**: The Sequencer CL sends a Fork Choice Update to its EL (including `PayloadAttributes`), indicating an update to the chain's latest head. The EL then publishes a `BuilderAttribute` event to the stream.
+- **Fork Choice Update**: The Sequencer CL sends a Fork Choice Update to its EL (including `PayloadAttributes`), indicating an update to the chain's latest head. The EL then publishes a `BuilderAttributesV1` event to the stream.
 
-- **Send Builder Payload**: After the builder consumes the latest `BuilderAttribute` from the sequencer, it will start to prepare a new block inserting the txs from the `transactions` field included in the `PayloadAttributes`. Once the builder EL receives an `ExecutionPayloadV2` from its CL where the `blockHash` matches the `headBlockHash` from the FCU, it will finish constructing a new block and send it back to the sequencer EL.
-<!-- 
-### Requesting a Block
-The block request mechanism ***MUST*** be triggered when the Driver schedules a new Fork Choice Update on the
-Sequencer. The Sequencer will translate the received Payload Attributes into a Payload Request for the
-Block Builder. As specified lower, the Sequencer ***MUST*** simulate the received payload to ensure correctness until
-an accountability mechanism can be introdcued.
+- **Send Builder Payload**: After the builder consumes the latest `BuilderAttributesV1` from the sequencer, it will start to prepare a new block inserting the txs from the `transactions` field included in the `PayloadAttributes`. Once the builder EL receives an `ExecutionPayloadV2` from its CL where the `blockHash` matches the `headBlockHash` from the FCU, it will finish constructing a new block and send a `BuilderPayloadV1` message to the sequencer EL via the `builder_newPayload` endpoint. The Sequencer ***MUST*** simulate the received payload to ensure correctness until an accountability mechanism can be introduced.
+
+- **Propose New Block**: The Sequencer EL will continuously receive/validate new blocks via the `builder_newPayload` endpoint until the CL sends a `engine_newPayload` request. At this point, the EL will return the best block that was received for a given `payloadId`.
+
 
 #### Liveness Failsafe
 
-To maintain network liveness while utilizing the Builder API, the Sequencer ***MUST*** operate an auxiliary process
-when building blocks. This process concurrently executes a Builder API request to the Block Builder alongside a local
-block production request through its local execution engine. This two-pronged strategy for generating blocks ensures
-that network liveness persists, even in instances where the Block Builder's block construction process experiences
-delays or is offline. This fallback mechanism should be seen as a training wheel.
+To maintain network liveness while utilizing the Builder API, the Sequencer ***MUST*** operate an auxiliary process when building blocks. This process concurrently evaluates newly built blocks recieved via the `builder_newPayload` enpoint alongside a local block production request through its local execution engine. This two-pronged strategy for generating blocks ensures that network liveness persists, even in instances where the Block Builder's block construction process experiences delays or is offline. This fallback mechanism should be seen as a training wheel.
 
 ### Mempool Forwarding
 
-A builder network's throughput is conditional on the transactions it sees. Thus the Sequencer's Execution Engine,
-or simply it's RPC, can forward transactions to the Builder as part of regular mempool management, ensuring that
-user transactions are included in the Block Builder's block construction process efficiently.
+A builder network's throughput is conditional on the transactions it sees. Thus the Sequencer's Execution Engine, or simply it's RPC, can forward transactions to the Builder as part of regular mempool management, ensuring that user transactions are included in the Block Builder's block construction process efficiently.
 
 ### Builder Configuration
 
-A builder is defined as the tuple (`builderPubkey`, `builderUrl`). The Sequencer is responsible for managing this
-tuple, but it will eventually live on the
-L1 [`SystemConfig`](https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/system_config.md)
+A builder is defined as the tuple (`builderPubkey`, `builderUrl`). The Sequencer is responsible for managing this tuple, but it will eventually live on the L1 [`SystemConfig`](https://github.com/ethereum-optimism/specs/blob/main/specs/protocol/system_config.md)
 where changes are emitted as an event. ***Builder's have no restriction or policies enforced on them at this time.***
 
 ## Structures
 
 ### `BuilderAttributesV1`
-This structure contains information necessary to request a block from a local Block Builder.
+This structure contains information necessary start constructing a new block for a given `payloadId`.
 
 - `forkChoiceUpdate`: `ForkChoiceStateV1`
 - `payloadAttributes`: `PayloadAttributesV2`
@@ -120,7 +108,6 @@ This structure represents the Block Builder's response to the request for payloa
   - ([spec](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2))
 - `pubKey`: `Address`
 - `value`: `uint256` 
--->
 
 <!-- 
 ## Methods
