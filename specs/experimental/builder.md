@@ -148,7 +148,7 @@ This structure represents the Block Builder's response to the request for payloa
 
 **Specification**:
 
-1. Upon initialization, the Sequencer's Execution Client **MUST** start streaming `BuilderAttributesV1` events.
+1. When the sequencer is running with PBS enabled, upon initialization the Sequencer's Execution Client **MUST** start streaming `BuilderAttributesV1` events.
 2. Each `BuilderAttributesV1` event contains:
    - `forkChoiceUpdate`: The updated fork choice state from the Sequencer's Consensus Layer, indicating the latest chain head and fork status.
    - `payloadAttributes`: The attributes required to build a new block.
