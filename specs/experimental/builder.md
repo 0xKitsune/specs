@@ -46,7 +46,7 @@ sequenceDiagram
     Note over ELB: Subscribe to new BuilderAttributes from the sequencer
     ELB->>ELS: builder_subscribeBuilderAttributes
 
-    CLS-->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
+    CLS->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
     ELS-->>ELB: emit `BuilderAttribute` event
     ELB->>ELB: Prepare to build block for `payloadId`
     CLS->>ELS: engine_newPayoad()
