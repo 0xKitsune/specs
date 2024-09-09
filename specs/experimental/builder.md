@@ -144,13 +144,13 @@ This structure represents the Block Builder's response to the request for payloa
 4. The best block **MUST** be chosen from all submitted payloads for a given `payloadId`. If the timeout is reached without a valid payload, the Sequencer will fallback to the locally constructed block.
 
 
-### BuilderAttributes Stream
+### `builder_subscribeBuilderAttributes`
 
 **Specification**:
 
-1. Upon initialization, the Sequencer's Execution Client (EL) **MUST** start streaming `BuilderAttributesV1` events.
+1. Upon initialization, the Sequencer's Execution Client **MUST** start streaming `BuilderAttributesV1` events.
 2. Each `BuilderAttributesV1` event contains:
-   - `forkChoiceUpdate`: The updated fork choice state from the Sequencer's Consensus Layer (CL), indicating the latest chain head and fork status.
+   - `forkChoiceUpdate`: The updated fork choice state from the Sequencer's Consensus Layer, indicating the latest chain head and fork status.
    - `payloadAttributes`: The attributes required to build a new block.
    - `payloadId`: A unique identifier for the current pending block.
 3. The Builder **MUST** subscribe to this stream using the following RPC method:
