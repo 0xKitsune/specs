@@ -42,11 +42,13 @@ sequenceDiagram
     participant ELB as Execution Client (Builder)
     participant CLB as Op-Node (Builder)
 
-    Note over ELB: Subscribe to new payload attributes from the sequencer
-    ELB-->>ELS: builder_subscribePayloadAttributes
+    ELS->>ELS: Start `BuilderAttribute` stream
+
+    Note over ELB: Subscribe to new `BuilderAttributes`s from the sequencer
+    ELB-->>ELS: builder_subscribeBuilderAttributes
 
     CLS-->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
-    ELS-->>ELB: emit `PayloadAttribute` event
+    ELS-->>ELB: emit `BuilderAttribute` event
     ELB-->>ELB: Prepare to build block for `payloadId`
     CLS->>ELS: engine_newPayoad()
     ELS->>ELS: Start building block for `payloadId`
@@ -60,7 +62,7 @@ sequenceDiagram
     ELS->>ELS: Simulate payload and update best block
 
     CLS->>ELS: engine_getPayload()
-    Note over ELS: Propose the best block to the sequencer
+    Note over ELS: Propose the best block from all proposed blocks
     ELS-->>CLS: ExecutionPayload
 
     CLS->>CLS: Validate payload
@@ -68,18 +70,13 @@ sequenceDiagram
 ```
 
 
+- **BuilderAttribute Stream**: Upon initialization, the Sequencer EL starts a `BuilderAttribute` stream, enabling external block builders to consume the update and prepare to construct a new block for a given `payloadId`.
 
+- **Fork Choice Update**: The Sequencer CL sends a Fork Choice Update to its EL (including `PayloadAttributes`), indicating an update to the chain's latest head. The EL then publishes a `BuilderAttribute` event to the stream.
 
+- **Send Builder Payload**: After the builder consumes the latest `BuilderAttribute` from the sequencer, it will start to prepare a new block inserting the txs from the `transactions` field included in the `PayloadAttributes`. Once the builder EL receives an `ExecutionPayloadV2` from its CL where the `blockHash` matches the `headBlockHash` from the FCU, it will finish constructing a new block and send it back to the sequencer EL.
 <!-- 
-- **Fork Choice Update**: The Sequencer propagates a Fork Choice Update to the Block Builder, indicating an update
-to the chain's latest head.
-- **Forward Transaction**: The Sequencer's Execution Engine forwards transactions it received to the Block Builder
-to be included in a block. *This step is not necessary if the Block Builder can get transactions elsewise and forwarding
-does not give any specific inclusion gurantees.*
-- **Get Payload**: The Sequencer requests a block from the Block Builder for a specific head.
-
 ### Requesting a Block
-
 The block request mechanism ***MUST*** be triggered when the Driver schedules a new Fork Choice Update on the
 Sequencer. The Sequencer will translate the received Payload Attributes into a Payload Request for the
 Block Builder. As specified lower, the Sequencer ***MUST*** simulate the received payload to ensure correctness until
@@ -108,15 +105,12 @@ where changes are emitted as an event. ***Builder's have no restriction or polic
 
 ## Structures
 
-### `PayloadRequestV1`
-
+### `BuilderAttributesV1`
 This structure contains information necessary to request a block from a local Block Builder.
 
-- `blockNumber`: `uint256`
-- `parentHash`:  `Hash32`
-- `pubKey`: `Address`
-- `gasLimit`: `uint256`
-- `parentBeaconBlockRoot`: `Hash32`
+- `forkChoiceUpdate`: `ForkChoiceStateV1`
+- `payloadAttributes`: `PayloadAttributesV2`
+- `payloadId`: `DATA`, 8 Bytes - Identifier of the payload build process
 
 ### `BuilderPayloadV1`
 
@@ -125,8 +119,10 @@ This structure represents the Block Builder's response to the request for payloa
 - `executionPayload`: `ExecutionPayloadV2`
   - ([spec](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2))
 - `pubKey`: `Address`
-- `value`: `uint256`
+- `value`: `uint256` 
+-->
 
+<!-- 
 ## Methods
 
 ### `builder_getPayloadV1`
@@ -185,4 +181,5 @@ in `executionPayload` are correct as compared to local view of chain.
 **Specification**
 
 1. Client software ***MAY*** call this method if `builderPubkey` and `builderUrl` are set.
-2. Client software ***MUST*** retry if status is not `200`. -->
+2. Client software ***MUST*** retry if status is not `200`. 
+ -->
