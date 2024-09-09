@@ -154,7 +154,6 @@ This structure represents the Block Builder's response to the request for payloa
    - `payloadAttributes`: The attributes required to build a new block.
    - `payloadId`: A unique identifier for the current pending block.
 3. The Builder **MUST** subscribe to this stream using the following RPC method:
-    #### `builder_subscribeBuilderAttributes`
     - **method**: `builder_subscribeBuilderAttributes`
     - **params**: None
     - **Response**: Confirmation that the Builder has successfully subscribed to the `BuilderAttributes` stream.
