@@ -78,7 +78,7 @@ sequenceDiagram
 - **Propose New Block**: The Sequencer EL will continuously receive/validate new blocks via the `builder_newPayload` endpoint until the CL sends a `engine_newPayload` request. At this point, the EL will return the best block that was received for a given `payloadId`.
 
 
-#### Liveness Failsafe
+### Liveness Failsafe
 
 To maintain network liveness while utilizing the Builder API, the Sequencer ***MUST*** operate an auxiliary process when building blocks. This process concurrently evaluates newly built blocks recieved via the `builder_newPayload` enpoint alongside a local block production request through its local execution engine. This two-pronged strategy for generating blocks ensures that network liveness persists, even in instances where the Block Builder's block construction process experiences delays or is offline. This fallback mechanism should be seen as a training wheel.
 
