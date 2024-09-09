@@ -42,30 +42,29 @@ sequenceDiagram
     participant ELB as Execution Client (Builder)
     participant CLB as Op-Node (Builder)
 
-    %% Pick subscription endpoint %%
-    ELB-->>ELS: Subscribe to `PayloadAttribute` events
+    Note over ELB: Subscribe to new payload attributes from the sequencer
+    ELB-->>ELS: builder_subscribePayloadAttributes
 
-    %% Update to event emission %%
-    CLS-->>ELS: `engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)`
+    CLS-->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
     ELS-->>ELB: emit `PayloadAttribute` event
     ELB-->>ELB: Prepare to build block for `payloadId`
-    CLS->>ELS: `engine_newPayoad()`
+    CLS->>ELS: engine_newPayoad()
     ELS->>ELS: Start building block for `payloadId`
 
     Note over CLB: New block is peered via Beacon API
-    CLB->>ELB: `engine_forkchoiceUpdated(forkchoiceState, null)
-    CLB->>ELB: `engine_newPayload()
+    CLB->>ELB: engine_forkchoiceUpdated(forkchoiceState, null)
+    CLB->>ELB: engine_newPayload()
 
     ELB->>ELB: Build block for `payloadId`
     ELB->>ELS: builder_newPayload(BuilderPayload)
     ELS->>ELS: Simulate payload and update best block
 
-    CLS->>ELS: `engine_getPayload`
-    
-    Note over ELS: Best block is sent
+    CLS->>ELS: engine_getPayload()
+    Note over ELS: Propose the builder's block to the sequencer. If the builder delivers an invalid block or fails to build a block in time, the execution client should default to its own block. 
     ELS-->>CLS: ExecutionPayload
 
-    Note over CLS: Peer new block to network
+    CLS->>CLS: Validate payload
+    Note over CLS: Publish new block and peer to the network
 ```
 
 
