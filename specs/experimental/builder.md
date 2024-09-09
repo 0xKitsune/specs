@@ -70,7 +70,7 @@ sequenceDiagram
 
 
 
-
+<!-- 
 - **Fork Choice Update**: The Sequencer propagates a Fork Choice Update to the Block Builder, indicating an update
 to the chain's latest head.
 - **Forward Transaction**: The Sequencer's Execution Engine forwards transactions it received to the Block Builder
@@ -185,4 +185,4 @@ in `executionPayload` are correct as compared to local view of chain.
 **Specification**
 
 1. Client software ***MAY*** call this method if `builderPubkey` and `builderUrl` are set.
-2. Client software ***MUST*** retry if status is not `200`.
+2. Client software ***MUST*** retry if status is not `200`. -->
