@@ -49,18 +49,19 @@ sequenceDiagram
     CLS-->>ELS: `engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)`
     ELS-->>ELB: emit `PayloadAttribute` event
     ELB-->>ELB: Prepare to build block for `payloadId`
-    CLS-->>ELS: `engine_newPayoad()`
+    CLS->>ELS: `engine_newPayoad()`
     ELS->>ELS: Start building block for `payloadId`
 
     Note over CLB: New block is peered via Beacon API
-    CLB->>ELS: `engine_forkchoiceUpdated(forkchoiceState, null)
-    CLB->>ELS: `engine_newPayload()
+    CLB->>ELB: `engine_forkchoiceUpdated(forkchoiceState, null)
+    CLB->>ELB: `engine_newPayload()
 
-    %% TODO: repeat %% 
-    ELB->>ELB: Build block for `payloadId`
-    ELB-->>ELS: Send `BuilderPayload` for `payloadId`
-    ELS->>ELS: Simulate payload and update best block
-
+    loop Build and Send Payload
+        ELB->>ELB: Build block for `payloadId`
+        ELB->>ELS: builder_newPayload(BuilderPayload)
+        ELS->>ELS: Simulate payload and update best block
+    end
+    
     CLS->>ELS: `engine_getPayload`
     
     Note over ELS: Best block is sent
