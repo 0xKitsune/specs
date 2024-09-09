@@ -46,21 +46,21 @@ sequenceDiagram
     Note over ELB: Subscribe to new BuilderAttributes from the sequencer
     ELB->>ELS: builder_subscribeBuilderAttributes
 
-    CLS->>ELS: engine_forkchoiceUpdated(forkchoiceState, PayloadAttributes)
+    CLS->>ELS: engine_forkchoiceUpdatedV3(forkchoiceState, PayloadAttributes)
     ELS-->>ELB: emit `BuilderAttribute` event
     ELB->>ELB: Prepare to build block for `payloadId`
-    CLS->>ELS: engine_newPayoad()
+    CLS->>ELS: engine_newPayoadV3()
     ELS->>ELS: Start building block for `payloadId`
 
     Note over CLB: New block is peered from CL
-    CLB->>ELB: engine_forkchoiceUpdated(forkchoiceState, null)
-    CLB->>ELB: engine_newPayload()
+    CLB->>ELB: engine_forkchoiceUpdatedV3(forkchoiceState, null)
+    CLB->>ELB: engine_newPayloadV3()
 
     ELB->>ELB: Build block for `payloadId`
-    ELB->>ELS: builder_newPayload(BuilderPayloadV1)
+    ELB->>ELS: builder_newPayloadV1(BuilderPayloadV1)
     ELS->>ELS: Simulate payload and update best block
 
-    CLS->>ELS: engine_getPayload()
+    CLS->>ELS: engine_getPayloadV3()
     Note over ELS: Propose the best block from all proposed blocks
     ELS->>CLS: ExecutionPayload
 
