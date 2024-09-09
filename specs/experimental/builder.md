@@ -73,7 +73,7 @@ sequenceDiagram
 
 - **Fork Choice Update**: The Sequencer CL sends a Fork Choice Update to its EL (including `PayloadAttributes`), indicating an update to the chain's latest head. The EL then publishes a `BuilderAttributesV1` event to the stream.
 
-- **Send Builder Payload**: After the builder consumes the latest `BuilderAttributesV1` from the sequencer, it will start to prepare a new block inserting the txs from the `transactions` field included in the `PayloadAttributes`. Once the builder EL receives an `ExecutionPayloadV2` from its CL where the `blockHash` matches the `headBlockHash` from the FCU, it will finish constructing a new block and send a `BuilderPayloadV1` message to the sequencer EL via the `builder_newPayload` endpoint. The Sequencer ***MUST*** simulate the received payload to ensure correctness until an accountability mechanism can be introduced.
+- **Send Builder Payload**: After the builder consumes the latest `BuilderAttributesV1` from the sequencer, it will start to prepare a new block inserting the txs from the `transactions` field included in the `PayloadAttributes`. Once the builder EL receives an `ExecutionPayload` from its CL where the `blockHash` matches the `headBlockHash` from the FCU, it will finish constructing a new block and send a `BuilderPayloadV1` message to the sequencer EL via the `builder_newPayload` endpoint. The Sequencer ***MUST*** simulate the received payload to ensure correctness until an accountability mechanism can be introduced.
 
 - **Propose New Block**: The Sequencer EL will continuously receive/validate new blocks via the `builder_newPayload` endpoint until the CL sends a `engine_newPayload` request. At this point, the EL will return the best block that was received for a given `payloadId`.
 
@@ -96,16 +96,15 @@ where changes are emitted as an event. ***Builder's have no restriction or polic
 ### `BuilderAttributesV1`
 This structure contains information necessary start constructing a new block for a given `payloadId`.
 
-- `forkChoiceUpdate`: `ForkChoiceStateV1`
-- `payloadAttributes`: `PayloadAttributesV2`
+- `forkChoiceUpdate`: [`ForkChoiceStateV1`](https://specs.optimism.io/protocol/exec-engine.html#engine_forkchoiceupdatedv3)
+- `payloadAttributes`: [`PayloadAttributesV3`](https://specs.optimism.io/protocol/exec-engine.html#extended-payloadattributesv3)
 - `payloadId`: `DATA`, 8 Bytes - Identifier of the payload build process
 
 ### `BuilderPayloadV1`
 
 This structure represents the Block Builder's response to the request for payload.
 
-- `executionPayload`: `ExecutionPayloadV2`
-  - ([spec](https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2))
+- `executionPayload`: [`ExecutionPayloadV2`]((https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#executionpayloadv2))
 - `pubKey`: `Address`
 - `value`: `uint256` 
 
