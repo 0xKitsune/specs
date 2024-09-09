@@ -60,7 +60,8 @@ sequenceDiagram
     ELS->>ELS: Simulate payload and update best block
 
     CLS->>ELS: engine_getPayload()
-    Note over ELS: Propose the builder's block to the sequencer.\nIf the builder delivers an invalid block\nor fails to build a block in time,\nthe execution client should default to its own block.    ELS-->>CLS: ExecutionPayload
+    Note over ELS: Propose the best block to the sequencer
+    ELS-->>CLS: ExecutionPayload
 
     CLS->>CLS: Validate payload
     Note over CLS: Publish new block and peer to the network
