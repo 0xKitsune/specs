@@ -11,9 +11,9 @@
 - [Structures](#structures)
   - [`BuilderAttributesV1`](#payloadrequestv1)
   - [`BuilderPayloadV1`](#builderpayloadv1)
-- [Methods](#methods)
+<!-- - [Methods](#methods)
   - [`builder_getPayloadV1`](#builder_getpayloadv1)
-  - [`builder_forwardTransactionV1`](#builder_forwardtransactionv1)
+  - [`builder_forwardTransactionV1`](#builder_forwardtransactionv1) -->
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
