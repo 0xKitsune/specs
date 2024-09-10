@@ -49,12 +49,11 @@ sequenceDiagram
     CLS->>ELS: engine_forkchoiceUpdatedV3(forkchoiceState, PayloadAttributes)
     ELS-->>ELB: emit `BuilderAttribute` event
     ELB->>ELB: Prepare to build block for `payloadId`
-    CLS->>ELS: engine_newPayoadV3()
     ELS->>ELS: Start building block for `payloadId`
 
     Note over CLB: New block is peered from CL
-    CLB->>ELB: engine_forkchoiceUpdatedV3(forkchoiceState, null)
     CLB->>ELB: engine_newPayloadV3()
+    CLB->>ELB: engine_forkchoiceUpdatedV3(forkchoiceState, null)
 
     ELB->>ELB: Build block for `payloadId`
     ELB->>ELS: builder_newPayloadV1(BuilderPayloadV1)
